@@ -1,0 +1,35 @@
+name: scoreplayer
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "80"
+    networks:
+      caddy-mesh:
+        aliases:
+          - scoreplayer-web
+      internal: {}
+
+  api:
+    build: ./server
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - /data/scoreplayer/uploads:/app/uploads
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+networks:
+  caddy-mesh:
+    external: true
+  internal:

@@ -1,0 +1,14 @@
+{
+  "name": "scoreplayer-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "5.2.1",
+    "multer": "2.4.0",
+    "mysql2": "3.24.5"
+  }
+}

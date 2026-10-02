@@ -1,0 +1,112 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="currentFolderId !== 1">
+      <ion-button (click)="goToParent()" aria-label="Back to parent folder">
+        <ion-icon color="medium" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ currentFolderTitle }}</ion-title>
+    <ion-buttons slot="end" *ngIf="fullscreen.available">
+      <ion-button (click)="fullscreen.toggle()"
+        [attr.aria-label]="fullscreen.isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+        [title]="fullscreen.isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
+        <ion-icon color="medium" [name]="fullscreen.isFullscreen ? 'contract-outline' : 'expand-outline'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding" *ngIf="loading">
+    <ion-text color="medium">Loading library...</ion-text>
+  </div>
+  <div class="ion-padding" *ngIf="loadError">
+    <ion-text color="danger">{{ loadError }}</ion-text>
+  </div>
+  <div class="ion-padding" *ngIf="!loading && !loadError && folders.length === 0 && scores.length === 0">
+    <ion-text color="medium">This folder is empty. Add a MusicXML score or create a folder.</ion-text>
+    <p *ngIf="currentFolderId === 1">
+      Try <ion-chip [routerLink]="['/play/%2Fassets%2Fscores%2FFur_Elise.mxl']">Für Elise</ion-chip>
+      or <ion-chip [routerLink]="['/play/%2Fassets%2Fscores%2FWaltz_in_A_Minor.mxl']">Waltz in A Minor</ion-chip>.
+    </p>
+  </div>
+
+  <ion-list *ngIf="!loading && !loadError">
+    <ion-item-sliding *ngFor="let folder of folders">
+      <ion-item button (click)="openFolder(folder)">
+        <ion-icon name="folder-outline" slot="start" color="medium"></ion-icon>
+        <ion-label>{{ folder.name }}</ion-label>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option (click)="renameFolder(folder)">
+          <ion-icon name="create-outline" slot="start"></ion-icon>Edit
+        </ion-item-option>
+        <ion-item-option (click)="deleteFolder(folder)" color="danger">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>Delete
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+
+    <ion-item-sliding *ngFor="let score of scores">
+      <ion-item button (click)="openScore(score)">
+        <ion-icon name="musical-notes-outline" slot="start" color="medium"></ion-icon>
+        <ion-label>
+          <h2>{{ score.title }}</h2>
+          <p>{{ score.composer }} · {{ fileSize(score.sizeBytes) }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option (click)="editScore(score)">
+          <ion-icon name="create-outline" slot="start"></ion-icon>Edit
+        </ion-item-option>
+        <ion-item-option (click)="deleteScore(score)" color="danger">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>Delete
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button aria-label="Add to library"><ion-icon name="add"></ion-icon></ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="createFolder()" title="Create folder" aria-label="Create folder">
+        <ion-icon name="folder-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="openUpload()" title="Upload MusicXML" aria-label="Upload MusicXML">
+        <ion-icon name="document-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>
+
+<ion-modal [isOpen]="uploadOpen" (didDismiss)="uploadOpen = false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Upload MusicXML</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="uploadOpen = false" [disabled]="uploading">Cancel</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-label position="stacked">Title</ion-label>
+        <ion-input [(ngModel)]="uploadTitle" maxlength="255" placeholder="Score title"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Composer</ion-label>
+        <ion-input [(ngModel)]="uploadComposer" maxlength="255" placeholder="Composer name"></ion-input>
+      </ion-item>
+      <div class="ion-padding-vertical">
+        <label for="musicxml-file">MusicXML file</label>
+        <input id="musicxml-file" type="file" accept=".xml,.musicxml,.mxl"
+          (change)="selectUploadFile($event)" />
+      </div>
+      <ion-text *ngIf="uploadError" color="danger"><p>{{ uploadError }}</p></ion-text>
+      <ion-button expand="block" (click)="uploadScore()" [disabled]="uploading">
+        {{ uploading ? 'Uploading...' : 'Upload score' }}
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>

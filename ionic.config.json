@@ -1,0 +1,7 @@
+{
+  "name": "ScorePlayer",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

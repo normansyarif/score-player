@@ -1,0 +1,6 @@
+{
+    "appId": "com.musetrainer",
+    "appName": "ScorePlayer",
+    "webDir": "www",
+    "bundledWebRuntime": false
+}

@@ -1,0 +1,13 @@
+.git
+.angular
+node_modules
+server/node_modules
+data
+.env
+www
+dist
+coverage
+ios
+resources
+*.log
+.DS_Store

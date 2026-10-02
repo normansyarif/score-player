@@ -1,0 +1,3 @@
+http://practice.abel.syg {
+    reverse_proxy scoreplayer-web:80
+}
